@@ -1,0 +1,13 @@
+package knn;
+
+public class KNN {
+
+	public KNN(String filePath) {
+
+	}
+
+	public void inputData() {
+
+	}
+
+}

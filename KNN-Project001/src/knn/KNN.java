@@ -1,0 +1,17 @@
+package knn;
+
+import java.io.File;
+
+public class KNN {
+
+	private File dataFile;
+
+	public KNN(String filePath) {
+		dataFile = new File(filePath);
+	}
+
+	public void inputData() {
+		System.out.println("Hello");
+	}
+
+}
