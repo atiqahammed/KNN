@@ -1,0 +1,17 @@
+package knn;
+
+public class Distance {
+	private double distance;
+	private String ans;
+
+	public Distance(double) {
+		// TODO Auto-generated constructor stub
+	}
+
+	public double getDistance() {
+		return distance;
+	}
+	public String getAns() {
+		return ans;
+	}
+}

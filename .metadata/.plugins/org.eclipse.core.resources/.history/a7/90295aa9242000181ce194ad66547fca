@@ -1,0 +1,153 @@
+package knn;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.security.AllPermission;
+import java.util.*;
+
+public class KNN<T> {
+
+	private File dataFile;
+	private FileReader fileReader;
+	private BufferedReader bufferedReader;
+	private ArrayList<Data> allDataRow;
+	private ArrayList<Data> testData;
+	private ArrayList<Data> trainData;
+	private ArrayList<Integer> alreadyTested;
+	private ArrayList<Integer> indexOfTestedData;
+	private ArrayList<Distance> answerList;
+	private ArrayList<String> allTypeOfAns;
+	private Map<String, Integer> count;
+	private double totalAccuracy;
+
+	public KNN(String filePath) {
+		dataFile = new File(filePath);
+	}
+
+	public void inputData() {
+		preInitialize();
+		collectAllRow();
+	}
+
+	private void collectAllRow() {
+		String s = null;
+		try {
+			while ((s = bufferedReader.readLine()) != null) {
+				String data[] = s.split(" ");
+				allDataRow.add(new Data(data));
+				if (!allTypeOfAns.contains(data[data.length - 1]))
+					allTypeOfAns.add(data[data.length - 1]);
+			}
+		} catch (Exception e) {
+			System.out.println("input nite jhamela");
+		}
+	}
+
+	private void preInitialize() {
+		try {
+			fileReader = new FileReader(dataFile);
+		} catch (FileNotFoundException e) {
+			System.out.println("file not Found");
+		}
+		bufferedReader = new BufferedReader(fileReader);
+		allDataRow = new ArrayList<>();
+		alreadyTested = new ArrayList<>();
+		allTypeOfAns = new ArrayList<String>();
+		totalAccuracy = 0.0;
+	}
+
+	public void process() {
+
+		for (int i = 0; i < 10; i++) {
+			testData = new ArrayList<>();
+			trainData = new ArrayList<Data>();
+			randomize();
+			predict();
+		}
+		System.out.println("average accuracy = " + totalAccuracy / 10);
+	}
+
+	private void predict() {
+
+		int rightPredect = 0;
+		for (int i = 0; i < testData.size(); i++) {
+			count = new HashMap<>();
+			for (int j = 0; j < allTypeOfAns.size(); j++)
+				count.put(allTypeOfAns.get(j), 0);
+			answerList = new ArrayList<Distance>();
+			String predictedAns = getResult(testData.get(i));
+			String realAns = testData.get(i).getValueInIndex(testData.get(i).getColumnSize() - 1);
+			System.out.println(realAns + " " + predictedAns);
+			if (realAns.equals(predictedAns))
+				rightPredect++;
+		}
+
+		double accouracy = (double) rightPredect / testData.size();
+		System.out.println(accouracy);
+		totalAccuracy += accouracy;
+	}
+
+	private String getResult(Data data) {
+		for (int i = 0; i < trainData.size(); i++) {
+			Data train = trainData.get(i);
+			double distance = calculateDistance(data, trainData.get(i));
+			answerList.add(new Distance(distance, trainData.get(i).getValueInIndex(trainData.get(i).getColumnSize() - 1)));
+		}
+
+		sort(answerList);
+		for (int i = 0; i < 30; i++)
+			count.put(answerList.get(i).getAns(), count.get(answerList.get(i).getAns()) + 1);
+
+		String ans = allTypeOfAns.get(0);
+		for (int i = 0; i < allTypeOfAns.size(); i++) {
+			if (count.get(ans) < count.get(allTypeOfAns.get(i)))
+				ans = allTypeOfAns.get(i);
+		}
+		return ans;
+	}
+
+	public void sort(ArrayList<Distance> allStudent) {
+		int n = allStudent.size();
+		Distance temp = null;
+		for (int i = 0; i < n; i++)
+			for (int j = 0; j < n - i - 1; j++)
+				if (allStudent.get(j).getDistance() > allStudent.get(j + 1).getDistance()) {
+					temp = allStudent.get(j);
+					allStudent.set(j, allStudent.get(j + 1));
+					allStudent.set(j + 1, temp);
+				}
+	}
+
+	private double calculateDistance(Data data, Data data2) {
+		double distance = 0.0;
+		for (int i = 1; i < data.getColumnSize() - 1; i++) {
+			double temp = Double.parseDouble(data.getValueInIndex(i)) - Double.parseDouble(data2.getValueInIndex(i));
+			distance += temp * temp;
+		}
+		return distance;
+	}
+
+	private void randomize() {
+		int testDataSize = allDataRow.size() / 10;
+		indexOfTestedData = new ArrayList<Integer>();
+		while (indexOfTestedData.size() < testDataSize) {
+			int x = new Random().nextInt(allDataRow.size());
+			if (!alreadyTested.contains(x)) {
+				alreadyTested.add(x);
+				indexOfTestedData.add(x);
+			}
+		}
+		seperateTestAndTrainData();
+	}
+
+	private void seperateTestAndTrainData() {
+		for (int i = 0; i < allDataRow.size(); i++) {
+			if (indexOfTestedData.contains(i))
+				testData.add(allDataRow.get(i));
+			else
+				trainData.add(allDataRow.get(i));
+		}
+	}
+}

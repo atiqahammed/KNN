@@ -8,6 +8,7 @@ public class Test {
 		//System.out.println("hello world");
 		KNN knn = new KNN("ecoliData.txt");
 		knn.inputData();
+		knn.process();
 
 	}
 
